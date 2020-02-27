@@ -167,11 +167,12 @@ class Graph():
 
     def __init__(self, model=None, args=None, input_names=None,
                  transforms="default", framework_transforms="default",
-                 meaningful_ids=False):
+                 meaningful_ids=False, rankdir="TD"):
         self.nodes = {}
         self.edges = []
         self.meaningful_ids = meaningful_ids # TODO
         self.theme = THEMES["basic"]
+        self.rankdir = rankdir
 
         if model:
             # Detect framwork
@@ -324,7 +325,7 @@ class Graph():
                  fontcolor=self.theme["font_color"],
                  fontname=self.theme["font_name"],
                  margin=self.theme["margin"],
-                 rankdir="LR",
+                 rankdir=self.rankdir,
                  pad=self.theme["padding"])
         dot.attr("node", shape="box", 
                  style="filled", margin="0,0",
