@@ -53,7 +53,7 @@ def get_shape(torch_node):
     # https://discuss.pytorch.org/t/node-output-shape-from-trace-graph/24351/2
     # TODO: find a better way to extract output shape
     # TODO: Assuming the node has one output. Update if we encounter a multi-output node.
-    m = re.match(r".*Float\(([\d\s\,]+)\).*", str(next(torch_node.outputs())))
+    m = re.search(r"Float\(([\d\s\,]+)\)", str(next(torch_node.outputs())))
     if m:
         shape = m.group(1)
         shape = shape.split(",")
