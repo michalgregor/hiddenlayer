@@ -154,9 +154,14 @@ class FoldDuplicates():
                 pattern = ge.SerialPattern([ge.NodePattern(node.op), ge.NodePattern(node.op)])
                 matches, _ = pattern.match(graph, node)
                 if matches:
+                    combo_name = node.name
+                    # replace number x number by MxN:
+                    # when folding, different kernel sizes may get folded together
+                    combo_name = re.sub("([1-9]+x[1-9]+)", "MxN", combo_name)
+
                     # Use op and name from the first node, and output_shape from the last
                     combo = Node(uid=graph.sequence_id(matches),
-                                name=node.name,
+                                name=combo_name,
                                 op=node.op,
                                 output_shape=matches[-1].output_shape)
                     combo._caption = node.caption
