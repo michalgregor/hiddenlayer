@@ -131,9 +131,10 @@ class Node():
 ###########################################################################
 
 def build_graph(model=None, args=None, input_names=None,
-                transforms="default", framework_transforms="default"):
+                transforms="default", framework_transforms="default",
+                rankdir="TD", theme=None):
     # Initialize an empty graph
-    g = Graph()
+    g = Graph(rankdir=rankdir, theme=theme)
 
     # Detect framwork
     framework = detect_framework(model)
@@ -167,11 +168,16 @@ class Graph():
 
     def __init__(self, model=None, args=None, input_names=None,
                  transforms="default", framework_transforms="default",
-                 meaningful_ids=False, rankdir="TD"):
+                 meaningful_ids=False, rankdir="TD", theme=None):
         self.nodes = {}
         self.edges = []
         self.meaningful_ids = meaningful_ids # TODO
-        self.theme = THEMES["basic"]
+
+        if theme is None:
+            self.theme = THEMES["basic"]
+        else:
+            self.theme = theme
+
         self.rankdir = rankdir
 
         if model:
