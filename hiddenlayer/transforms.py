@@ -213,9 +213,15 @@ class FoldDuplicates():
                 matches, _ = pattern.match(graph, node)
                 if matches:
                     combo_name = node.name
-                    # replace number x number by MxN:
-                    # when folding, different kernel sizes may get folded together
-                    combo_name = re.sub("([1-9]+x[1-9]+)", "MxN", combo_name)
+                    # replace number x number by MxN if folding layers with
+                    # different kernel sizes
+                    m = re.search("([1-9]+x[1-9]+)", combo_name)
+                    if m:
+                        for rep_node in matches:
+                            m_rep = re.search("([1-9]+x[1-9]+)", rep_node.name)
+                            if m_rep and m.group(1) != m_rep.group(1):
+                                combo_name = re.sub("([1-9]+x[1-9]+)", "MxN", combo_name)
+                                break
 
                     # Use op and name from the first node, and output_shape from the last
                     combo = Node(uid=graph.sequence_id(matches),
