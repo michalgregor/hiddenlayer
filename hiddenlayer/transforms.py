@@ -142,6 +142,64 @@ class PruneBranch():
             graph.remove(tagged)
         return graph
 
+class PruneBranchId():
+    def __init__(self, id_regex, direction="incoming"):
+        self.id_regex = re.compile(id_regex)
+        self.direction = direction
+
+    def tag(self, node, tag, graph, conditional=False):
+        # Return if the node is already tagged
+        if hasattr(node, "__tag__") and node.__tag__ == "tag":
+            return
+
+        if self.direction == "incoming":
+            graph_incoming = graph.incoming
+            graph_outgoing = graph.outgoing
+        elif self.direction == "outgoing":
+            graph_outgoing = graph.incoming
+            graph_incoming = graph.outgoing
+        else:
+            raise ValueError("Direction must be one of ('incoming', 'outgoing').")
+
+        # If conditional, then tag the node if and only if all its
+        # outgoing nodes already have the same tag.
+        if conditional:
+            # Are all outgoing nodes already tagged?
+            outgoing = graph_outgoing(node)
+            tagged = filter(lambda n: hasattr(n, "__tag__") and n.__tag__ == tag,
+                            outgoing)
+            if len(list(tagged)) != len(outgoing):
+                # Not all outgoing are tagged
+                return
+
+        # Tag the node
+        node.__tag__ = tag
+        # Tag incoming nodes
+        for n in graph_incoming(node):
+            self.tag(n, tag, graph, conditional=True)
+
+    def apply(self, graph):
+        # Copy the graph. Don't change the original.
+        graph = copy.deepcopy(graph)
+
+        while True:
+            matches = []
+            for node in graph.nodes.values():
+                m = self.id_regex.match(node.id)
+                if m:
+                    matches.append(node)
+
+            if not len(matches):
+                break
+
+            # Tag found nodes and their incoming branches
+            for n in matches:
+                self.tag(n, "delete", graph)
+            # Find all tagged nodes and delete them
+            tagged = [n for n in graph.nodes.values()
+                      if hasattr(n, "__tag__") and n.__tag__ == "delete"]
+            graph.remove(tagged)
+        return graph
 
 class FoldDuplicates():
     def apply(self, graph):
