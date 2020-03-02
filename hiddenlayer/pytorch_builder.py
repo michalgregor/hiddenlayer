@@ -78,6 +78,15 @@ def import_graph(hl_graph, model, args, input_names=None, verbose=False):
     for torch_node in torch_graph.nodes():
         # Op
         op = torch_node.kind()
+        name = None
+
+        # for node type PythonOp, we extract the actual name
+        if op == "prim::PythonOp":
+            name = torch_node.pyname()
+            m = re.match("(.+)JitAutoFn", name)
+            if m:
+                name = m.group(1)
+
         # Parameters
         params = {k: torch_node[k] for k in torch_node.attributeNames()} 
         # Inputs/outputs
@@ -86,7 +95,7 @@ def import_graph(hl_graph, model, args, input_names=None, verbose=False):
         # Get output shape
         shape = get_shape(torch_node)
         # Add HL node
-        hl_node = Node(uid=pytorch_id(torch_node), name=None, op=op, 
+        hl_node = Node(uid=pytorch_id(torch_node), name=name, op=op, 
                        output_shape=shape, params=params)
         hl_graph.add_node(hl_node)
         # Add edges
