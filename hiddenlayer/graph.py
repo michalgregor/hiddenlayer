@@ -103,14 +103,14 @@ class Node():
             return self._caption
 
         caption = ""
-
         # Stride
-        # if "stride" in self.params:
-        #     stride = self.params["stride"]
-        #     if np.unique(stride).size == 1:
-        #         stride = stride[0]
-        #     if stride != 1:
-        #         caption += "/{}".format(str(stride))
+        if "strides" in self.params:
+            stride = self.params["strides"]
+            if np.unique(stride).size == 1:
+                stride = stride[0]
+            if stride != 1:
+                caption += "stride: {}".format(str(stride))
+
         return caption
 
     def __repr__(self):
