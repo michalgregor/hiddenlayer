@@ -17,24 +17,24 @@ import numpy as np
 
 THEMES = {
     "basic": {
-        "background_color": "#FFFFFF",
+        "background_color": "#FFFFFF00",
         "fill_color": "#E8E8E8",
         "outline_color": "#000000",
         "font_color": "#000000",
         "font_name": "Times",
         "font_size": "10",
         "margin": "0,0",
-        "padding":  "1.0,0.5",
+        "padding":  "0,0",
     },
     "blue": {
-        "background_color": "#FFFFFF",
+        "background_color": "#FFFFFF00",
         "fill_color": "#BCD6FC",
         "outline_color": "#7C96BC",
         "font_color": "#202020",
         "font_name": "Verdana",
         "font_size": "10",
         "margin": "0,0",
-        "padding":  "1.0,0.5",
+        "padding":  "0,0",
     },
 }
 
