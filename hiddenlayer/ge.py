@@ -140,30 +140,37 @@ class ParallelPattern():
 
         # TODO: If more nodes than patterns, we should consider
         #       all permutations of the nodes
-        if len(self.patterns) != len(nodes):
-            return [], None
-        
-        patterns = self.patterns.copy()
-        nodes = nodes.copy()
-        all_matches = []
-        end_node = None
-        for p in patterns:
-            found = False
-            for n in nodes:
-                matches, following = p.match(graph, n)
+        if len(self.patterns) < len(nodes):
+            for i in range(len(nodes) - len(self.patterns) + 1):
+                matches, end_node = self.match(graph, nodes[i:i+len(self.patterns)])
                 if matches:
-                    found = True
-                    nodes.remove(n)
-                    all_matches.extend(matches)
-                    # Verify all branches end in the same node
-                    if end_node:
-                        if end_node != following:
-                            return [], None
-                    else:
-                        end_node = following
-                    break
-            if not found:
-                return [], None
-        return all_matches, end_node
+                    return matches, end_node
 
+            return [], None
+        elif len(self.patterns) != len(nodes):
+            return [], None
+        else:
+            patterns = self.patterns.copy()
+            nodes = nodes.copy()
+            all_matches = []
+            end_node = None
+            for p in patterns:
+                found = False
+                for n in nodes:
+                    matches, following = p.match(graph, n)
+                    if matches:
+                        found = True
+                        nodes.remove(n)
+                        all_matches.extend(matches)
+                        # Verify all branches end in the same node
+                        if end_node:
+                            if end_node != following:
+                                return [], None
+                        else:
+                            end_node = following
+                        break
+                if not found:
+                    return [], None
+
+            return all_matches, end_node
 
