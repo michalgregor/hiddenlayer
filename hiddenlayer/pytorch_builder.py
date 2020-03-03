@@ -82,10 +82,10 @@ def import_graph(hl_graph, model, args, input_names=None, verbose=False):
 
         # for node type PythonOp, we extract the actual name
         if op == "prim::PythonOp":
-            name = torch_node.pyname()
-            m = re.match("(.+)JitAutoFn", name)
+            op = torch_node.pyname()
+            m = re.match("(.+)JitAutoFn", op)
             if m:
-                name = m.group(1)
+                op = m.group(1)
 
         # Parameters
         params = {k: torch_node[k] for k in torch_node.attributeNames()} 
