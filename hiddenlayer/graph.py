@@ -81,21 +81,11 @@ class Node():
     def title(self):
         # Default
         title = self.name or self.op
-        stride = None
 
         if "kernel_shape" in self.params:
             # Kernel
             kernel = self.params["kernel_shape"]
             title += "x".join(map(str, kernel))
-        if "stride" in self.params:
-            stride = self.params["stride"]
-        if "strides" in self.params:
-            stride = self.params["strides"]
-        if stride:
-            if np.unique(stride).size == 1:
-                stride = stride[0]
-            if stride != 1:
-                title += "/s{}".format(str(stride))
         #         # Transposed
         #         if node.transposed:
         #             name = "Transposed" + name
@@ -108,13 +98,18 @@ class Node():
             return self._caption
 
         caption = ""
-        # Stride
-#        if "strides" in self.params:
-#            stride = self.params["strides"]
-#            if np.unique(stride).size == 1:
-#                stride = stride[0]
-#            if stride != 1:
-#                caption += "stride: {}".format(str(stride))
+
+        # strides
+        stride = None
+        if "stride" in self.params:
+            stride = self.params["stride"]
+        if "strides" in self.params:
+            stride = self.params["strides"]
+        if stride:
+            if np.unique(stride).size == 1:
+                stride = stride[0]
+            if stride != 1:
+                caption += "s={}".format(str(stride))
 
         # Groups: depthwise convolution
         groups = None
@@ -123,7 +118,7 @@ class Node():
         if 'group' in self.params:
             groups = self.params['group']
         if groups and groups != 1:
-            caption += " group: {}".format(groups)
+            caption += " g={}".format(groups)
 
         return caption
 
