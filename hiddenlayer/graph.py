@@ -90,6 +90,9 @@ class Node():
         #         if node.transposed:
         #             name = "Transposed" + name
 
+        if self.op == 'Dropout' and "ratio" in self.params:
+            title += "({})".format(self.params['ratio'])
+
         return title
 
     @property
