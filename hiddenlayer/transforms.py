@@ -201,6 +201,45 @@ class PruneBranchId():
             graph.remove(tagged)
         return graph
 
+def make_caption_dict(caption, keys=['g', 's']):
+    caption_dict = {}
+    matches = re.findall("(({})=([1-9]+))".format("|".join(keys)), caption)
+
+    if matches:
+        caption_dict = {m[1]: m[2] for m in matches}
+
+    return caption_dict
+
+def update_caption_dict(caption_dict1, caption_dict2):
+    caption_dict = caption_dict1.copy()
+
+    for k, v in caption_dict2.items():
+        try:
+            caption_dict[k] = None if caption_dict[k] != v else v
+        except KeyError:
+            caption_dict[k] = None
+
+    for k, v in caption_dict1.items():
+        if not k in caption_dict2:
+            caption_dict[k] = None
+
+    return caption_dict
+
+def update_caption(caption, caption_dict):
+    caption = copy.copy(caption)
+
+    for k, v in caption_dict.items():
+        caption, n = re.subn(
+            "({}=[1-9]+)".format(k),
+            "{}={}".format(k, v) if not v is None else " {}".format(k),
+            caption
+        )
+
+        if not n:
+            caption += " {}={}".format(k, v) if not v is None else " {}".format(k)
+
+    return caption
+
 class FoldDuplicates():
     def apply(self, graph):
         # Copy the graph. Don't change the original.
@@ -213,22 +252,32 @@ class FoldDuplicates():
                 matches, _ = pattern.match(graph, node)
                 if matches:
                     combo_name = node.name
+                    combo_caption = node.caption
                     # replace number x number by MxN if folding layers with
                     # different kernel sizes
-                    m = re.search("([1-9]+x[1-9]+)", combo_name)
-                    if m:
-                        for rep_node in matches:
+                    m_name = re.search("([1-9]+x[1-9]+)", combo_name)
+                    caption_dict = make_caption_dict(combo_caption)
+                    
+                    for rep_node in matches:
+                        caption_dict = update_caption_dict(
+                            caption_dict,
+                            make_caption_dict(rep_node.caption)
+                        )
+
+                        if m_name:
                             m_rep = re.search("([1-9]+x[1-9]+)", rep_node.name)
-                            if m_rep and m.group(1) != m_rep.group(1):
+                            if m_rep and m_name.group(1) != m_rep.group(1):
                                 combo_name = re.sub("([1-9]+x[1-9]+)", "MxN", combo_name)
                                 break
+
+                    combo_caption = update_caption(combo_caption, caption_dict)
 
                     # Use op and name from the first node, and output_shape from the last
                     combo = Node(uid=graph.sequence_id(matches),
                                 name=combo_name,
                                 op=node.op,
                                 output_shape=matches[-1].output_shape)
-                    combo._caption = node.caption
+                    combo._caption = combo_caption
                     combo.repeat = sum([n.repeat for n in matches])
                     graph.replace(matches, combo)
                     break
